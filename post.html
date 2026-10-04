@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Blog Post</title>
+
+    <link rel="stylesheet"
+          href="/static/style.css">
+
+</head>
+
+<body>
+
+<header>
+
+    <div class="logo">
+        📝 My Blog
+    </div>
+
+    <nav>
+
+        <a href="/">
+            Home
+        </a>
+
+        <a href="/create.html">
+            Create Post
+        </a>
+
+    </nav>
+
+</header>
+
+
+<main>
+
+    <article
+        id="post"
+        class="single-post">
+
+        Loading...
+
+    </article>
+
+
+    <section class="comments">
+
+        <h2>
+            Comments
+        </h2>
+
+
+        <div id="comments">
+
+            Loading comments...
+
+        </div>
+
+
+        <div class="comment-form">
+
+            <h3>
+                Add a Comment
+            </h3>
+
+            <textarea
+                id="commentText"
+                placeholder="Write your comment...">
+            </textarea>
+
+            <button onclick="addComment()">
+                Comment
+            </button>
+
+            <p id="message"></p>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+const postId =
+    params.get("id");
+
+
+async function loadPost() {
+
+    const response =
+        await fetch(
+            "/api/posts/" + postId
+        );
+
+
+    const data =
+        await response.json();
+
+
+    if (!response.ok) {
+
+        document
+        .getElementById("post")
+        .innerText =
+            data.error;
+
+        return;
+
+    }
+
+
+    const post =
+        data.post;
+
+
+    document
+    .getElementById("post")
+    .innerHTML = `
+
+        <h1>
+            ${post.title}
+        </h1>
+
+        <p class="author">
+            By ${post.username}
+        </p>
+
+        <p class="content">
+            ${post.content}
+        </p>
+
+    `;
+
+
+    const comments =
+        document.getElementById(
+            "comments"
+        );
+
+
+    comments.innerHTML = "";
+
+
+    if (data.comments.length === 0) {
+
+        comments.innerHTML =
+            "<p>No comments yet.</p>";
+
+        return;
+
+    }
+
+
+    data.comments.forEach(
+        comment => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+            div.className =
+                "comment";
+
+
+            div.innerHTML = `
+
+                <strong>
+                    ${comment.username}
+                </strong>
+
+                <p>
+                    ${comment.content}
+                </p>
+
+                <small>
+                    ${comment.created_at}
+                </small>
+
+            `;
+
+
+            comments.appendChild(div);
+
+        }
+    );
+
+}
+
+
+async function addComment() {
+
+    const token =
+        localStorage.getItem(
+            "token"
+        );
+
+
+    if (!token) {
+
+        alert(
+            "Please login to comment."
+        );
+
+        window.location =
+            "/login.html";
+
+        return;
+
+    }
+
+
+    const content =
+        document.getElementById(
+            "commentText"
+        ).value.trim();
+
+
+    if (!content) {
+
+        alert(
+            "Please write a comment."
+        );
+
+        return;
+
+    }
+
+
+    const response =
+        await fetch(
+            "/api/posts/" +
+            postId +
+            "/comments",
+            {
+                method: "POST",
+
+                headers: {
+
+                    "Content-Type":
+                        "application/json",
+
+                    "Authorization":
+                        "Bearer " + token
+
+                },
+
+                body: JSON.stringify({
+
+                    content: content
+
+                })
+
+            }
+        );
+
+
+    const data =
+        await response.json();
+
+
+    if (response.ok) {
+
+        document
+        .getElementById(
+            "commentText"
+        ).value = "";
+
+        loadPost();
+
+    } else {
+
+        document
+        .getElementById(
+            "message"
+        ).innerText =
+            data.error;
+
+    }
+
+}
+
+
+loadPost();
+
+</script>
+
+</body>
+
+</html>

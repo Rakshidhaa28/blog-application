@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Register</title>
+
+    <link rel="stylesheet"
+          href="/static/style.css">
+
+</head>
+
+<body>
+
+<header>
+
+    <div class="logo">
+        📝 My Blog
+    </div>
+
+    <nav>
+
+        <a href="/">Home</a>
+
+        <a href="/login.html">
+            Login
+        </a>
+
+    </nav>
+
+</header>
+
+
+<main>
+
+    <div class="form-container">
+
+        <h1>
+            Create Account
+        </h1>
+
+        <form id="registerForm">
+
+            <label>
+                Username
+            </label>
+
+            <input
+                type="text"
+                id="username"
+                placeholder="Enter username"
+                required>
+
+
+            <label>
+                Password
+            </label>
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Minimum 6 characters"
+                required>
+
+
+            <button type="submit">
+                Register
+            </button>
+
+        </form>
+
+        <p id="message"></p>
+
+        <p>
+            Already have an account?
+
+            <a href="/login.html">
+                Login
+            </a>
+        </p>
+
+    </div>
+
+</main>
+
+
+<script>
+
+document
+.getElementById("registerForm")
+.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const username =
+        document.getElementById("username").value;
+
+    const password =
+        document.getElementById("password").value;
+
+
+    const response = await fetch(
+        "/api/register",
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
+        }
+    );
+
+
+    const data =
+        await response.json();
+
+
+    const message =
+        document.getElementById("message");
+
+
+    if (response.ok) {
+
+        message.innerText =
+            "Registration successful!";
+
+        setTimeout(
+            () => {
+                window.location =
+                    "/login.html";
+            },
+            1000
+        );
+
+    } else {
+
+        message.innerText =
+            data.error;
+
+    }
+
+});
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>My Blog</title>
+
+    <link rel="stylesheet"
+          href="/static/style.css">
+
+</head>
+
+<body>
+
+<header>
+
+    <div class="logo">
+        📝 My Blog
+    </div>
+
+    <nav>
+
+        <a href="/">Home</a>
+
+        <a href="/create.html">
+            Create Post
+        </a>
+
+        <a href="/login.html"
+           id="loginLink">
+            Login
+        </a>
+
+        <a href="/register.html"
+           id="registerLink">
+            Register
+        </a>
+
+        <button
+            id="logoutButton"
+            onclick="logout()"
+            style="display:none;">
+            Logout
+        </button>
+
+    </nav>
+
+</header>
+
+
+<main>
+
+    <section class="hero">
+
+        <h1>
+            Welcome to My Blog
+        </h1>
+
+        <p>
+            Share your thoughts and
+            connect with others.
+        </p>
+
+        <a href="/create.html"
+           class="button">
+            Create New Post
+        </a>
+
+    </section>
+
+
+    <h2>
+        Latest Posts
+    </h2>
+
+    <div id="posts">
+
+        Loading posts...
+
+    </div>
+
+</main>
+
+
+<script src="/static/script.js"></script>
+
+</body>
+
+</html>
