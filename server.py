@@ -65,57 +65,37 @@ class BlogServer(BaseHTTPRequestHandler):
         return sessions.get(token)
 
     def serve_file(self, filepath, content_type):
-        full_path = os.path.join(
-            BASE_DIR,
-            filepath
-        )
+        full_path = os.path.join(BASE_DIR, filepath)
 
         if not os.path.isfile(full_path):
-            self.send_error(
-                404,
-                "File not found"
-            )
+            self.send_error(404, "File not found")
             return
 
         try:
             with open(full_path, "rb") as file:
-                content = file.read()
+             content = file.read()
 
             self.send_response(200)
-
-            self.send_header(
-                "Content-Type",
-                content_type
-            )
-
-            self.send_header(
-                "Content-Length",
-                str(len(content))
-            )
-
+            self.send_header("Content-Type", content_type)
+            self.send_header("Content-Length", str(len(content)))
             self.end_headers()
-
             self.wfile.write(content)
 
         except Exception as error:
-            self.send_error(
-                500,
-                str(error)
-            )
-
+            self.send_error(500, str(error)))
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path
 
         pages = {
-            "/": "templates/index.html",
-            "/index.html": "templates/index.html",
-            "/login.html": "templates/login.html",
-            "/register.html": "templates/register.html",
-            "/create.html": "templates/create.html",
-            "/post.html": "templates/post.html",
-            "/edit.html": "templates/edit.html"
-        }
+            "/": "index.html",
+            "/index.html": "index.html",
+            "/login.html": "login.html",
+            "/register.html": "register.html",
+            "/create.html": "create.html",
+            "/post.html": "post.html"
+            
+}
 
         if path in pages:
             self.serve_file(
