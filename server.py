@@ -14,8 +14,6 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sessions = {}
 
 class BlogServer(BaseHTTPRequestHandler):
-
-```
 def send_json(self, data, status=200):
     response = json.dumps(data).encode("utf-8")
 
