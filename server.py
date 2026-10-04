@@ -9,7 +9,7 @@ from database import get_db, init_db, hash_password
 HOST = "0.0.0.0"
 PORT = int(os.environ.get("PORT", 8000))
 
-BASE_DIR = os.path.dirname(os.path.abspath(**file**))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 sessions = {}
 
