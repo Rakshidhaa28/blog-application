@@ -82,7 +82,7 @@ class BlogServer(BaseHTTPRequestHandler):
             self.wfile.write(content)
 
         except Exception as error:
-            self.send_error(500, str(error)))
+            self.send_error(500, str(error))
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path
