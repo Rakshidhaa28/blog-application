@@ -103,40 +103,38 @@ class BlogServer(BaseHTTPRequestHandler):
                 "text/html; charset=utf-8"
             )
             return
-
         if path.startswith("/static/"):
-            filepath = path.lstrip("/")
+            filename = os.path.basename(path)
 
-            if filepath.endswith(".css"):
-                content_type = "text/css"
+            if filename.endswith(".css"):
+               content_type = "text/css"
 
-            elif filepath.endswith(".js"):
-                content_type = "application/javascript"
+            elif filename.endswith(".js"):
+               content_type = "application/javascript"
 
-            elif filepath.endswith(".png"):
-                content_type = "image/png"
+            elif filename.endswith(".png"):
+               content_type = "image/png"
 
-            elif filepath.endswith(".jpg"):
-                content_type = "image/jpeg"
+            elif filename.endswith(".jpg") or filename.endswith(".jpeg"):
+               content_type = "image/jpeg"
 
-            elif filepath.endswith(".jpeg"):
-                content_type = "image/jpeg"
+            elif filename.endswith(".gif"):
+               content_type = "image/gif"
 
-            elif filepath.endswith(".gif"):
-                content_type = "image/gif"
-
-            elif filepath.endswith(".svg"):
-                content_type = "image/svg+xml"
+            elif filename.endswith(".svg"):
+               content_type = "image/svg+xml"
 
             else:
-                content_type = "application/octet-stream"
+               content_type = "application/octet-stream"
 
             self.serve_file(
-                filepath,
+                filename,
                 content_type
             )
             return
+       
 
+       
         if path == "/api/posts":
             conn = get_db()
 
