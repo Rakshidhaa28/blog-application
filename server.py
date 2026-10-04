@@ -6,35 +6,16 @@ from urllib.parse import urlparse
 
 from database import get_db, init_db, hash_password
 
-=========================================================
-
-SERVER CONFIGURATION
-
-=========================================================
-
 HOST = "0.0.0.0"
 PORT = int(os.environ.get("PORT", 8000))
 
-Project folder path
-
-BASE_DIR = os.path.dirname(os.path.abspath(file))
-
-Temporary login sessions
+BASE_DIR = os.path.dirname(os.path.abspath(**file**))
 
 sessions = {}
 
-=========================================================
-
-BLOG SERVER
-
-=========================================================
-
 class BlogServer(BaseHTTPRequestHandler):
 
-# =====================================================
-# SEND JSON RESPONSE
-# =====================================================
-
+```
 def send_json(self, data, status=200):
     response = json.dumps(data).encode("utf-8")
 
@@ -51,10 +32,6 @@ def send_json(self, data, status=200):
 
     self.wfile.write(response)
 
-# =====================================================
-# READ JSON REQUEST
-# =====================================================
-
 def read_json(self):
     try:
         length = int(
@@ -70,12 +47,7 @@ def read_json(self):
     except Exception:
         return {}
 
-# =====================================================
-# GET LOGGED-IN USER
-# =====================================================
-
 def get_user(self):
-
     auth = self.headers.get(
         "Authorization",
         ""
@@ -92,154 +64,97 @@ def get_user(self):
 
     return sessions.get(token)
 
-# =====================================================
-# SERVE HTML / CSS / JS / IMAGE FILES
-# =====================================================
-
 def serve_file(self, filepath, content_type):
-
-    # Convert relative path to absolute path
-    filepath = os.path.join(
+    full_path = os.path.join(
         BASE_DIR,
         filepath
     )
 
-    if not os.path.exists(filepath):
-
+    if not os.path.isfile(full_path):
         self.send_error(
             404,
             "File not found"
         )
-
         return
 
     try:
-
-        with open(filepath, "rb") as file:
+        with open(full_path, "rb") as file:
             content = file.read()
 
         self.send_response(200)
-
         self.send_header(
             "Content-Type",
             content_type
         )
-
         self.send_header(
             "Content-Length",
             str(len(content))
         )
-
         self.end_headers()
 
         self.wfile.write(content)
 
-    except Exception as e:
-
+    except Exception as error:
         self.send_error(
             500,
-            str(e)
+            str(error)
         )
 
-# =====================================================
-# GET REQUESTS
-# =====================================================
-
 def do_GET(self):
-
     parsed = urlparse(self.path)
     path = parsed.path
 
-    # -------------------------------------------------
-    # HTML PAGES
-    # -------------------------------------------------
-
     pages = {
-
-        "/":
-            "templates/index.html",
-
-        "/index.html":
-            "templates/index.html",
-
-        "/login.html":
-            "templates/login.html",
-
-        "/register.html":
-            "templates/register.html",
-
-        "/create.html":
-            "templates/create.html",
-
-        "/post.html":
-            "templates/post.html",
-
-        "/edit.html":
-            "templates/edit.html"
+        "/": "templates/index.html",
+        "/index.html": "templates/index.html",
+        "/login.html": "templates/login.html",
+        "/register.html": "templates/register.html",
+        "/create.html": "templates/create.html",
+        "/post.html": "templates/post.html",
+        "/edit.html": "templates/edit.html"
     }
 
     if path in pages:
-
         self.serve_file(
             pages[path],
             "text/html; charset=utf-8"
         )
-
         return
 
-    # -------------------------------------------------
-    # STATIC FILES
-    # -------------------------------------------------
-
     if path.startswith("/static/"):
-
         filepath = path.lstrip("/")
 
         if filepath.endswith(".css"):
-
             content_type = "text/css"
 
         elif filepath.endswith(".js"):
-
             content_type = "application/javascript"
 
         elif filepath.endswith(".png"):
-
             content_type = "image/png"
 
         elif filepath.endswith(".jpg"):
-
             content_type = "image/jpeg"
 
         elif filepath.endswith(".jpeg"):
-
             content_type = "image/jpeg"
 
         elif filepath.endswith(".gif"):
-
             content_type = "image/gif"
 
         elif filepath.endswith(".svg"):
-
             content_type = "image/svg+xml"
 
         else:
-
             content_type = "application/octet-stream"
 
         self.serve_file(
             filepath,
             content_type
         )
-
         return
 
-    # =================================================
-    # GET ALL POSTS
-    # =================================================
-
     if path == "/api/posts":
-
         conn = get_db()
 
         posts = conn.execute(
@@ -262,48 +177,30 @@ def do_GET(self):
         result = []
 
         for post in posts:
-
             result.append({
-
                 "id": post["id"],
-
                 "title": post["title"],
-
                 "content": post["content"],
-
-                "created_at":
-                    post["created_at"],
-
-                "username":
-                    post["username"]
+                "created_at": post["created_at"],
+                "username": post["username"]
             })
 
         self.send_json(result)
-
         return
 
-    # =================================================
-    # GET SINGLE POST
-    # =================================================
-
     if path.startswith("/api/posts/"):
-
         try:
-
             post_id = int(
                 path.split("/")[-1]
             )
 
         except ValueError:
-
             self.send_json(
                 {
-                    "error":
-                        "Invalid post ID"
+                    "error": "Invalid post ID"
                 },
                 400
             )
-
             return
 
         conn = get_db()
@@ -326,17 +223,14 @@ def do_GET(self):
         ).fetchone()
 
         if not post:
-
             conn.close()
 
             self.send_json(
                 {
-                    "error":
-                        "Post not found"
+                    "error": "Post not found"
                 },
                 404
             )
-
             return
 
         comments = conn.execute(
@@ -360,67 +254,32 @@ def do_GET(self):
         comment_list = []
 
         for comment in comments:
-
             comment_list.append({
-
-                "id":
-                    comment["id"],
-
-                "content":
-                    comment["content"],
-
-                "created_at":
-                    comment["created_at"],
-
-                "username":
-                    comment["username"]
+                "id": comment["id"],
+                "content": comment["content"],
+                "created_at": comment["created_at"],
+                "username": comment["username"]
             })
 
-        result = {
-
-            "id":
-                post["id"],
-
-            "title":
-                post["title"],
-
-            "content":
-                post["content"],
-
-            "created_at":
-                post["created_at"],
-
-            "user_id":
-                post["user_id"],
-
-            "username":
-                post["username"],
-
-            "comments":
-                comment_list
-        }
-
-        self.send_json(result)
+        self.send_json({
+            "id": post["id"],
+            "title": post["title"],
+            "content": post["content"],
+            "created_at": post["created_at"],
+            "user_id": post["user_id"],
+            "username": post["username"],
+            "comments": comment_list
+        })
 
         return
 
-    # =================================================
-    # CURRENT USER
-    # =================================================
-
     if path == "/api/me":
-
         user_id = self.get_user()
 
         if not user_id:
-
-            self.send_json(
-                {
-                    "logged_in":
-                        False
-                }
-            )
-
+            self.send_json({
+                "logged_in": False
+            })
             return
 
         conn = get_db()
@@ -437,56 +296,31 @@ def do_GET(self):
         conn.close()
 
         if not user:
-
-            self.send_json(
-                {
-                    "logged_in":
-                        False
-                }
-            )
-
+            self.send_json({
+                "logged_in": False
+            })
             return
 
         self.send_json({
-
-            "logged_in":
-                True,
-
-            "id":
-                user["id"],
-
-            "username":
-                user["username"]
+            "logged_in": True,
+            "id": user["id"],
+            "username": user["username"]
         })
 
         return
-
-    # =================================================
-    # UNKNOWN GET REQUEST
-    # =================================================
 
     self.send_error(
         404,
         "Page not found"
     )
 
-# =====================================================
-# POST REQUESTS
-# =====================================================
-
 def do_POST(self):
-
     parsed = urlparse(self.path)
     path = parsed.path
 
     data = self.read_json()
 
-    # =================================================
-    # REGISTER
-    # =================================================
-
     if path == "/api/register":
-
         username = str(
             data.get("username", "")
         ).strip()
@@ -496,7 +330,6 @@ def do_POST(self):
         )
 
         if not username or not password:
-
             self.send_json(
                 {
                     "error":
@@ -504,11 +337,9 @@ def do_POST(self):
                 },
                 400
             )
-
             return
 
         if len(username) < 3:
-
             self.send_json(
                 {
                     "error":
@@ -516,11 +347,9 @@ def do_POST(self):
                 },
                 400
             )
-
             return
 
         if len(password) < 4:
-
             self.send_json(
                 {
                     "error":
@@ -528,7 +357,6 @@ def do_POST(self):
                 },
                 400
             )
-
             return
 
         conn = get_db()
@@ -543,7 +371,6 @@ def do_POST(self):
         ).fetchone()
 
         if existing:
-
             conn.close()
 
             self.send_json(
@@ -553,7 +380,6 @@ def do_POST(self):
                 },
                 409
             )
-
             return
 
         password_hash = hash_password(
@@ -581,7 +407,6 @@ def do_POST(self):
             {
                 "message":
                     "Registration successful",
-
                 "user_id":
                     user_id
             },
@@ -590,12 +415,7 @@ def do_POST(self):
 
         return
 
-    # =================================================
-    # LOGIN
-    # =================================================
-
     if path == "/api/login":
-
         username = str(
             data.get("username", "")
         ).strip()
@@ -605,7 +425,6 @@ def do_POST(self):
         )
 
         if not username or not password:
-
             self.send_json(
                 {
                     "error":
@@ -613,7 +432,6 @@ def do_POST(self):
                 },
                 400
             )
-
             return
 
         conn = get_db()
@@ -633,7 +451,6 @@ def do_POST(self):
         conn.close()
 
         if not user:
-
             self.send_json(
                 {
                     "error":
@@ -641,7 +458,6 @@ def do_POST(self):
                 },
                 401
             )
-
             return
 
         password_hash = hash_password(
@@ -649,7 +465,6 @@ def do_POST(self):
         )
 
         if password_hash != user["password"]:
-
             self.send_json(
                 {
                     "error":
@@ -657,7 +472,6 @@ def do_POST(self):
                 },
                 401
             )
-
             return
 
         token = secrets.token_hex(32)
@@ -665,7 +479,6 @@ def do_POST(self):
         sessions[token] = user["id"]
 
         self.send_json({
-
             "message":
                 "Login successful",
 
@@ -673,7 +486,6 @@ def do_POST(self):
                 token,
 
             "user": {
-
                 "id":
                     user["id"],
 
@@ -684,19 +496,13 @@ def do_POST(self):
 
         return
 
-    # =================================================
-    # LOGOUT
-    # =================================================
-
     if path == "/api/logout":
-
         auth = self.headers.get(
             "Authorization",
             ""
         )
 
         if auth.startswith("Bearer "):
-
             token = auth.replace(
                 "Bearer ",
                 "",
@@ -708,25 +514,17 @@ def do_POST(self):
                 None
             )
 
-        self.send_json(
-            {
-                "message":
-                    "Logout successful"
-            }
-        )
+        self.send_json({
+            "message":
+                "Logout successful"
+        })
 
         return
 
-    # =================================================
-    # CREATE POST
-    # =================================================
-
     if path == "/api/posts":
-
         user_id = self.get_user()
 
         if not user_id:
-
             self.send_json(
                 {
                     "error":
@@ -734,7 +532,6 @@ def do_POST(self):
                 },
                 401
             )
-
             return
 
         title = str(
@@ -746,7 +543,6 @@ def do_POST(self):
         ).strip()
 
         if not title or not content:
-
             self.send_json(
                 {
                     "error":
@@ -754,7 +550,6 @@ def do_POST(self):
                 },
                 400
             )
-
             return
 
         conn = get_db()
@@ -781,7 +576,6 @@ def do_POST(self):
             {
                 "message":
                     "Post created successfully",
-
                 "post_id":
                     post_id
             },
@@ -790,25 +584,15 @@ def do_POST(self):
 
         return
 
-    # =================================================
-    # ADD COMMENT
-    # =================================================
-
     if (
         path.startswith("/api/posts/")
         and path.endswith("/comments")
     ):
-
         try:
-
             parts = path.split("/")
-
-            post_id = int(
-                parts[3]
-            )
+            post_id = int(parts[3])
 
         except Exception:
-
             self.send_json(
                 {
                     "error":
@@ -816,13 +600,11 @@ def do_POST(self):
                 },
                 400
             )
-
             return
 
         user_id = self.get_user()
 
         if not user_id:
-
             self.send_json(
                 {
                     "error":
@@ -830,7 +612,6 @@ def do_POST(self):
                 },
                 401
             )
-
             return
 
         content = str(
@@ -838,7 +619,6 @@ def do_POST(self):
         ).strip()
 
         if not content:
-
             self.send_json(
                 {
                     "error":
@@ -846,7 +626,6 @@ def do_POST(self):
                 },
                 400
             )
-
             return
 
         conn = get_db()
@@ -861,7 +640,6 @@ def do_POST(self):
         ).fetchone()
 
         if not post:
-
             conn.close()
 
             self.send_json(
@@ -871,7 +649,6 @@ def do_POST(self):
                 },
                 404
             )
-
             return
 
         conn.execute(
@@ -900,41 +677,28 @@ def do_POST(self):
 
         return
 
-    # =================================================
-    # UNKNOWN POST REQUEST
-    # =================================================
-
     self.send_error(
         404,
         "API not found"
     )
 
-# =====================================================
-# PUT REQUEST - UPDATE POST
-# =====================================================
-
 def do_PUT(self):
-
     parsed = urlparse(self.path)
     path = parsed.path
 
     if not path.startswith("/api/posts/"):
-
         self.send_error(
             404,
             "API not found"
         )
-
         return
 
     try:
-
         post_id = int(
             path.split("/")[-1]
         )
 
     except ValueError:
-
         self.send_json(
             {
                 "error":
@@ -942,13 +706,11 @@ def do_PUT(self):
             },
             400
         )
-
         return
 
     user_id = self.get_user()
 
     if not user_id:
-
         self.send_json(
             {
                 "error":
@@ -956,7 +718,6 @@ def do_PUT(self):
             },
             401
         )
-
         return
 
     data = self.read_json()
@@ -970,7 +731,6 @@ def do_PUT(self):
     ).strip()
 
     if not title or not content:
-
         self.send_json(
             {
                 "error":
@@ -978,7 +738,6 @@ def do_PUT(self):
             },
             400
         )
-
         return
 
     conn = get_db()
@@ -997,7 +756,6 @@ def do_PUT(self):
     ).fetchone()
 
     if not post:
-
         conn.close()
 
         self.send_json(
@@ -1007,7 +765,6 @@ def do_PUT(self):
             },
             404
         )
-
         return
 
     conn.execute(
@@ -1026,39 +783,28 @@ def do_PUT(self):
     conn.commit()
     conn.close()
 
-    self.send_json(
-        {
-            "message":
-                "Post updated successfully"
-        }
-    )
-
-# =====================================================
-# DELETE REQUEST - DELETE POST
-# =====================================================
+    self.send_json({
+        "message":
+            "Post updated successfully"
+    })
 
 def do_DELETE(self):
-
     parsed = urlparse(self.path)
     path = parsed.path
 
     if not path.startswith("/api/posts/"):
-
         self.send_error(
             404,
             "API not found"
         )
-
         return
 
     try:
-
         post_id = int(
             path.split("/")[-1]
         )
 
     except ValueError:
-
         self.send_json(
             {
                 "error":
@@ -1066,13 +812,11 @@ def do_DELETE(self):
             },
             400
         )
-
         return
 
     user_id = self.get_user()
 
     if not user_id:
-
         self.send_json(
             {
                 "error":
@@ -1080,7 +824,6 @@ def do_DELETE(self):
             },
             401
         )
-
         return
 
     conn = get_db()
@@ -1099,7 +842,6 @@ def do_DELETE(self):
     ).fetchone()
 
     if not post:
-
         conn.close()
 
         self.send_json(
@@ -1109,10 +851,8 @@ def do_DELETE(self):
             },
             404
         )
-
         return
 
-    # Delete comments first
     conn.execute(
         """
         DELETE FROM comments
@@ -1121,7 +861,6 @@ def do_DELETE(self):
         (post_id,)
     )
 
-    # Delete post
     conn.execute(
         """
         DELETE FROM posts
@@ -1133,17 +872,15 @@ def do_DELETE(self):
     conn.commit()
     conn.close()
 
-    self.send_json(
-        {
-            "message":
-                "Post deleted successfully"
-        }
-    )
-=========================================================
-START SERVER
-=========================================================
-if name == "main":
-# Initialize database
+    self.send_json({
+        "message":
+            "Post deleted successfully"
+    })
+```
+
+if **name** == "**main**":
+
+```
 init_db()
 
 print(
@@ -1157,14 +894,10 @@ server = HTTPServer(
 )
 
 try:
-
     server.serve_forever()
 
 except KeyboardInterrupt:
-
-    print()
     print("Server stopped.")
 
 finally:
-
     server.server_close()
